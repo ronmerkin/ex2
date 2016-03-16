@@ -126,13 +126,8 @@ public class TodoListManagerActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(View v) {
-                        //checking if the number is a valid israeli number
-//                        Pattern p = Pattern.compile("\\+9725\\d{8}|05\\d[-]?\\d{7}");
-//                        Matcher m = p.matcher(txt.getText().toString());
-                          String uri = txt.getText().toString();
-//                        if (m.find()) {
-//                            uri = m.group(0);
-//                        }
+
+                        String uri = txt.getText().toString();
 
                         if (uri.contains("Call")) {
                             String list[] = uri.split(",");
