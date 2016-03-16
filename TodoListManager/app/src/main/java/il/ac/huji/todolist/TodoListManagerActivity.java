@@ -127,20 +127,22 @@ public class TodoListManagerActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         //checking if the number is a valid israeli number
-                        Pattern p = Pattern.compile("\\+9725\\d{8}|05\\d[-]?\\d{7}");
-                        Matcher m = p.matcher(txt.getText().toString());
-                        String uri = null;
-                        if (m.find()) {
-                            uri = m.group(0);
-                        }
-                        if (uri != null) {
+//                        Pattern p = Pattern.compile("\\+9725\\d{8}|05\\d[-]?\\d{7}");
+//                        Matcher m = p.matcher(txt.getText().toString());
+                          String uri = txt.getText().toString();
+//                        if (m.find()) {
+//                            uri = m.group(0);
+//                        }
 
-                            uri = uri.replaceAll("[^0-9|\\+]", "");
-                            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", uri, null));
+                        if (uri.contains("Call")) {
+                            String list[] = uri.split(",");
+                            String toCall = list[0];
+                            toCall = toCall.replaceAll("[^0-9|\\+]", "");
+                            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", toCall, null));
                             startActivity(intent);
                         } else {
                             AlertDialog.Builder errAlert = new AlertDialog.Builder(TodoListManagerActivity.this);
-                            errAlert.setMessage("Not a valid phone number");
+                            errAlert.setMessage("Not a valid input for calling");
                             errAlert.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
 
                                 @Override
