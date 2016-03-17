@@ -234,7 +234,7 @@ public class TodoListManagerActivity extends AppCompatActivity {
                 }else {
                     if(!text.getText().toString().isEmpty()){
 
-                        adapter.add(text.getText().toString());
+                        adapter.add(text.getText().toString() + ", No due date");
                     }
 
                 }
