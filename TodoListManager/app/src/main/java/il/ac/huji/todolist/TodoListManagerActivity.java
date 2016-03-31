@@ -24,6 +24,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,29 +43,61 @@ import java.util.regex.Pattern;
 import static android.app.PendingIntent.getActivity;
 
 public class TodoListManagerActivity extends AppCompatActivity {
-    private ArrayList<String> stringsList;
+    private ArrayList<ListItem> stringsList;
     private EditText toAdd;
     private ListView toDoList;
-    private ArrayAdapter<String> adapter;
-
-
+    private ArrayAdapter<ListItem> adapter;
+    private Firebase firebase;
+    private Firebase itemsList;
+    Boolean upload = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Firebase.setAndroidContext(this);
+        firebase = new Firebase("https://ex4-todolist.firebaseio.com/");
 
+        itemsList = firebase.child("list-items");
+        stringsList = new ArrayList<ListItem>();
+        itemsList.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!upload){
+                    upload = true;
+                    for(DataSnapshot data : dataSnapshot.getChildren()){
+                        String item = data.getValue(String.class);
+                        String key = data.getKey();
+                        ListItem listItem = new ListItem(item, key);
+                        stringsList.add(listItem);
 
+                    }
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
         toDoList = (ListView) findViewById(R.id.todolist);
-        stringsList = new ArrayList<String>();
-        adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, stringsList) {
+
+
+        adapter = new ArrayAdapter<ListItem>(getApplicationContext(), R.layout.listitem, stringsList) {
 
             @Override
             public View getView(int position, View convertView,
                                 ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-
-                TextView textView = (TextView) view.findViewById(android.R.id.text1);
+                //View view = super.getView(position, convertView, parent);
+                View view = convertView;
+                if(view == null){
+                    LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+                    view = layoutInflater.inflate(R.layout.listitem, null);
+                }
+                TextView textView = (TextView) view.findViewById(R.id.output);
+                textView.setText(getItem(position).getItem());
                 // if a date is entered we want to check what color it would be
                 Date date = null;
                 try {
@@ -110,14 +146,13 @@ public class TodoListManagerActivity extends AppCompatActivity {
                 View toShow = factory.inflate(R.layout.longclick, null);
                 alert.setView(toShow);
                 Button callBtn = (Button) toShow.findViewById(R.id.callbtn);
-                final TextView txt = (TextView) view.findViewById(android.R.id.text1);
+                final TextView txt = (TextView) view.findViewById(R.id.output);
 
-                //to check how to set the title to the item in the list
-                alert.setTitle(toDoList.getItemAtPosition(position).toString());
+                alert.setTitle(adapter.getItem(position).getItem());
                 alert.setPositiveButton("Delete Item", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        itemsList.child(adapter.getItem(position).getKey()).removeValue();
                         adapter.remove(adapter.getItem(position));
                         adapter.notifyDataSetChanged();
                     }
@@ -203,13 +238,13 @@ public class TodoListManagerActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                dateChosen[0] = true;
+
                 listener[0] = new DatePickerDialog.OnDateSetListener() {
 
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-
+                        dateChosen[0] = true;
                         yearA[0] = year;
                         monthA[0] = monthOfYear + 1;
                         dayA[0] = dayOfMonth;
@@ -227,14 +262,23 @@ public class TodoListManagerActivity extends AppCompatActivity {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 // if the user chose to set a date
                 if(dateChosen[0]){
-
-                        adapter.add(text.getText().toString() + ", Due Date: " + dayA[0] + "/" + monthA[0] + "/" + yearA[0]);
+                        Firebase toAdd = itemsList.push();
+                        String key = toAdd.getKey();
+                        toAdd.setValue(text.getText().toString() + ", Due Date: " + dayA[0] + "/" + monthA[0] + "/" + yearA[0]);
+                        String item = text.getText().toString() + ", Due Date: " + dayA[0] + "/" + monthA[0] + "/" + yearA[0];
+                        ListItem listItem = new ListItem(item, key);
+                        adapter.add(listItem);
                 }else {
                     if(!text.getText().toString().isEmpty()){
-
-                        adapter.add(text.getText().toString() + ", No due date");
+                        Firebase toAdd = itemsList.push();
+                        String key = toAdd.getKey();
+                        String item = text.getText().toString() + ", No due date";
+                        itemsList.push().setValue(text.getText().toString() + ", No due date");
+                        ListItem listItem = new ListItem(item, key);
+                        adapter.add(listItem);
                     }
 
                 }
@@ -253,6 +297,7 @@ public class TodoListManagerActivity extends AppCompatActivity {
         alert.create().show();
 
     }
+
 
 
 }
