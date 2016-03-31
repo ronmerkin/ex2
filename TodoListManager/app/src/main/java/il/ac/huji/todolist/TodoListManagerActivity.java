@@ -96,15 +96,18 @@ public class TodoListManagerActivity extends AppCompatActivity {
                     LayoutInflater layoutInflater = LayoutInflater.from(getContext());
                     view = layoutInflater.inflate(R.layout.listitem, null);
                 }
-                TextView textView = (TextView) view.findViewById(R.id.output);
-                textView.setText(getItem(position).getItem());
+                TextView textView1 = (TextView) view.findViewById(R.id.output);
+                TextView textView2 = (TextView) view.findViewById(R.id.date);
+                String[] separator = getItem(position).getItem().split(",");
+                textView1.setText(separator[0]);
+                textView2.setText(separator[1]);
                 // if a date is entered we want to check what color it would be
                 Date date = null;
                 try {
                     String dateFromText = null;
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
                     Pattern p = Pattern.compile(".*\\s(\\d{1,2}\\/\\d{1,2}\\/\\d{4})|\\d{1,2}\\/\\d{1,2}\\/\\d{4}");
-                    Matcher m = p.matcher(textView.getText().toString());
+                    Matcher m = p.matcher(textView2.getText().toString());
 
                     if (m.find()){
 
@@ -125,12 +128,16 @@ public class TodoListManagerActivity extends AppCompatActivity {
 
                     if(res < 0){
 
-                        textView.setTextColor(Color.BLACK);
+                        textView1.setTextColor(Color.BLACK);
+                        textView2.setTextColor(Color.BLACK);
                     }else{
-                        textView.setTextColor(Color.RED);
+                        textView1.setTextColor(Color.RED);
+                        textView2.setTextColor(Color.RED);
                     }
                 }else {
-                    textView.setTextColor(Color.BLACK);
+                    textView1.setTextColor(Color.BLACK);
+                    textView2.setTextColor(Color.BLACK);
+
                 }
 
                 return view;

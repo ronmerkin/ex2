@@ -5,12 +5,17 @@
     android:weightSum="1">
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:textSize="18dp"
         android:paddingTop="2dip"
         android:paddingBottom="3dip"
         android:id="@+id/output"
         android:layout_gravity="right" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/date" />
 
 </LinearLayout>
